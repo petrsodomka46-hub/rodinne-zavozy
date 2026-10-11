@@ -1,5 +1,8 @@
 # Rodinné závozy – návod
 
+**Adresa aplikace: <https://petrsodomka46-hub.github.io/rodinne-zavozy/>**
+(kód: <https://github.com/petrsodomka46-hub/rodinne-zavozy>, data: Supabase projekt `dnmwhftbdudyfslahpwd`)
+
 Webová aplikace (PWA) pro plánování závozů dětí do školy a na kroužky.
 Děti zadávají, kdy a kam potřebují, rodiče potvrzují, kdo je poveze.
 Na iPhonu se přidá na plochu a chová se jako normální aplikace.
@@ -50,7 +53,8 @@ Aplikace je jen sada statických souborů. Možnosti:
   Repozitář musí být veřejný (na bezplatném účtu). Kód neobsahuje nic tajného, jen jména a přihlašovací e-maily.
 - **Netlify Drop** – <https://app.netlify.com/drop>, přetáhnout celou složku. Zdarma, repozitář netřeba.
 
-Po každé změně souborů zvyšte číslo `CACHE` v `sw.js` (`zavozy-v2`, …), aby si telefony stáhly novou verzi.
+**Nasazení úprav** (aplikace běží na GitHub Pages z větve `main`): zvyšte číslo `CACHE` v `sw.js`
+(`zavozy-v3`, …), pak `git commit` a `git push`. Za 1–2 minuty si telefony při dalším otevření stáhnou novou verzi.
 
 ### 5. Instalace na iPhone
 Safari → otevřít adresu aplikace → **Sdílet** (čtvereček se šipkou) → **Přidat na plochu** → otevřít ikonou → přihlásit se.
