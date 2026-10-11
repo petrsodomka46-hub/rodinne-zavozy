@@ -23,9 +23,8 @@ const RETURN_LABEL = {
   other_to: 'Zpět vyzvednout v (nepovinné)',
 };
 // Způsoby, které si dítě může zvolit samo (bez řidiče z rodiny).
-// Ty rodiče nepotvrzují.
+// Způsoby, kdy dítě jede samo.
 const SELF_MODES = [['walk', '🚶 Pěšky'], ['bike', '🚲 Na kole'], ['scooter', '🛵 Na skútru'], ['bus', '🚌 Autobus']];
-const isSelf = (r) => SELF_MODES.some(([k]) => k === r.mode);
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
 
 const S = {
@@ -113,11 +112,8 @@ function howText(r) {
 
 function status(r) {
   if (r.cancelled) return { cls: 'cancelled', text: 'Zrušeno' };
-  if (!r.confirmed_at && !isSelf(r)) {
-    return r.mode === 'need'
-      ? { cls: 'need', text: 'Potřebuje odvoz' }
-      : { cls: 'pending', text: `${howText(r)} · čeká na potvrzení` };
-  }
+  // Potvrzení rodičů potřebuje jen „Potřebuji odvoz“, ostatní způsoby platí rovnou.
+  if (r.mode === 'need') return { cls: 'need', text: 'Potřebuje odvoz' };
   return { cls: 'ok', text: howText(r) };
 }
 
@@ -146,7 +142,7 @@ function coverage() {
 
 function pendingRides() {
   const t = todayISO();
-  return S.rides.filter((r) => r.ride_date >= t && (r.cancelled || (!r.confirmed_at && !isSelf(r))));
+  return S.rides.filter((r) => r.ride_date >= t && (r.cancelled || r.mode === 'need'));
 }
 
 function groupByDate(rides) {
@@ -291,11 +287,9 @@ function rideCard(r, { showDate = false, quick = false } = {}) {
   if (quick && isParent()) {
     if (r.cancelled) {
       actions = `<button class="btn small" data-action="delete-now" data-id="${r.id}">Odstranit</button>`;
-    } else if (r.mode === 'need') {
+    } else {
       actions = parents().map((p) => `
         <button class="btn small driver" style="--c:${p.color}" data-action="quick-assign" data-id="${r.id}" data-driver="${p.id}">${esc(p.label)}</button>`).join('');
-    } else {
-      actions = `<button class="btn small primary" data-action="quick-confirm" data-id="${r.id}">Potvrdit</button>`;
     }
   }
   return `
@@ -357,10 +351,7 @@ function listByDate(rides, opts, emptyText) {
 
 function viewTodo() {
   const pend = pendingRides();
-  const confirmable = pend.filter((r) => !r.cancelled && r.mode !== 'need');
-  const bulk = confirmable.length > 1
-    ? `<button class="btn block" data-action="confirm-all">Potvrdit všechny s jiným rodičem (${confirmable.length})</button>` : '';
-  return coverageBanner() + bulk + listByDate(pend, { quick: true }, '🎉 Vše je vyřízené.');
+  return coverageBanner() + listByDate(pend, { quick: true }, '🎉 Vše je vyřízené.');
 }
 
 function viewDriving() {
@@ -421,7 +412,7 @@ function openRide(id) {
   if (isParent() && !r.cancelled) {
     const opt = (key, label, extra = '') => {
       const sel = (key === 'p:' + r.driver_id && r.mode === 'parent') || key === r.mode;
-      return `<button class="opt ${sel ? 'on' : ''} ${sel && !r.confirmed_at && !isSelf(r) ? 'unconfirmed' : ''}" data-action="assign" data-v="${key}" ${extra}>${label}</button>`;
+      return `<button class="opt ${sel ? 'on' : ''}" data-action="assign" data-v="${key}" ${extra}>${label}</button>`;
     };
     assign = `<h3>Kdo to zajistí?</h3>
       <div class="opts">
@@ -434,7 +425,7 @@ function openRide(id) {
         <button class="btn primary" data-action="assign-other">Uložit</button>
       </div>
       ${r.series_id ? `<label class="check"><input type="checkbox" id="assign-series"> Použít i pro všechny další jízdy této řady</label>` : ''}
-      ${r.mode !== 'need' && !r.confirmed_at && !isSelf(r) ? '<button class="btn primary block" data-action="confirm-ride">Potvrdit</button>' : ''}`;
+`;
   }
   const meta = [
     r.created_by ? `Zadal(a): ${by(r.created_by)}` : '',
@@ -726,24 +717,10 @@ const ACTIONS = {
     if (!name) return toast('Napiš, kdo dítě poveze.', true);
     assignRide(rideById($sheet.dataset.ride), 'other', name);
   },
-  'confirm-ride': () => {
-    const r = rideById($sheet.dataset.ride);
-    assignRide(r, r.mode === 'parent' ? 'p:' + r.driver_id : r.mode, r.other_name);
-  },
   'quick-assign': (el) => run(() => S.api.update(el.dataset.id, {
     mode: 'parent', driver_id: el.dataset.driver, other_name: null,
     confirmed_by: S.me.id, confirmed_at: new Date().toISOString(),
   }), 'Potvrzeno'),
-  'quick-confirm': (el) => run(() => S.api.update(el.dataset.id, {
-    confirmed_by: S.me.id, confirmed_at: new Date().toISOString(),
-  }), 'Potvrzeno'),
-  'confirm-all': () => {
-    const list = pendingRides().filter((r) => !r.cancelled && r.mode !== 'need');
-    const now = new Date().toISOString();
-    run(async () => {
-      for (const r of list) await S.api.update(r.id, { confirmed_by: S.me.id, confirmed_at: now });
-    }, `Potvrzeno: ${rideCount(list.length)}`);
-  },
   chip: (el) => {
     const f = S.form;
     const g = el.dataset.group;

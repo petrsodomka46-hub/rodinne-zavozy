@@ -12,7 +12,7 @@ Na iPhonu se přidá na plochu a chová se jako normální aplikace.
 | Kdo | Co dělá |
 |---|---|
 | **Tomáš, Elen** | Přidávají jízdy (do školy, ze školy, na kroužek, z kroužku a **ostatní** – cokoli navíc, kam/odkud napíšou sami) s časem a způsobem: *potřebuji odvoz / pěšky / na kole / na skútru / autobus / s jiným rodičem*. Mohou zadat i cestu zpět a opakování každý týden. Banner je upozorní, když nemají naplánováno aspoň 14 dní dopředu. |
-| **Petr, Miluška** | V záložce **K vyřízení** jedním klepnutím přiřadí řidiče (Táta / Máma) nebo potvrdí jízdu s jiným rodičem. Pěšky, na kole, na skútru a autobusem se nepotvrzuje – jen se zobrazí v přehledu. U opakované jízdy lze přiřadit celou řadu najednou. Záložka **Řídím** ukazuje, koho a kdy vezou. |
+| **Petr, Miluška** | V záložce **K vyřízení** jedním klepnutím přiřadí řidiče (Táta / Máma) Potvrzuje se jen *potřebuji odvoz*; pěšky, na kole, na skútru, autobusem i s jiným rodičem platí hned, jak to dítě zadá. U opakované jízdy lze přiřadit celou řadu najednou. Záložka **Řídím** ukazuje, koho a kdy vezou. |
 
 Pravidla hlídá přímo databáze:
 - Dítě může měnit jen své jízdy a nemůže si samo přiřadit rodiče.
