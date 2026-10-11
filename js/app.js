@@ -222,7 +222,8 @@ async function enter(sess) {
     return;
   }
   S.tab = 'week';
-  S.api.subscribe(debounce(refresh, 300));
+  // Odběr změn jen jednou za běh aplikace – při přepnutí uživatele se jen vymění přihlášení.
+  if (!S.unsubscribe) S.unsubscribe = S.api.subscribe(debounce(refresh, 300));
   await refresh();
 }
 
@@ -737,6 +738,11 @@ const ACTIONS = {
     syncForm();
   },
   logout: async () => {
+    if (!DEMO && S.me) {
+      const v = await choose('Odhlásit se?', 'Při dalším otevření bude potřeba znovu zadat heslo.',
+        [{ value: 'yes', label: 'Ano, odhlásit', cls: 'danger' }]);
+      if (v !== 'yes') { closeSheet(); return; }
+    }
     closeSheet();
     await S.api.signOut();
     S.me = null;
@@ -771,6 +777,7 @@ document.addEventListener('visibilitychange', () => {
 (async function boot() {
   try {
     S.api = await createApi();
+    S.api.onSignedOut?.(() => { S.me = null; closeSheet(); renderLogin(); });
     await enter(await S.api.session());
   } catch (e) {
     $app.innerHTML = `<div class="login"><h1>Chyba spuštění</h1><p class="muted">${esc(e.message)}</p>

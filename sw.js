@@ -1,7 +1,7 @@
 // Service worker: rychlé spuštění a základ pro offline.
 // Vlastní soubory: nejdřív síť (aby se aktualizace projevily hned), při výpadku cache.
 // Knihovny z CDN: cache (mají pevnou verzi). Volání Supabase API se necachují.
-const CACHE = 'zavozy-v3';
+const CACHE = 'zavozy-v4';
 const SHELL = [
   './', './index.html', './css/app.css', './manifest.webmanifest',
   './js/app.js', './js/api.js', './js/util.js', './js/config.js',

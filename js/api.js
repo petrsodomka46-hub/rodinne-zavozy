@@ -63,10 +63,14 @@ async function supabaseApi() {
       check(await sb.from('rides').delete().eq('series_id', seriesId).gte('ride_date', fromISO));
     },
     subscribe(onChange) {
-      const ch = sb.channel('rides-changes')
+      // Unikátní název: knihovna jinak vrátí už spuštěný kanál a odmítne do něj přidat posluchače.
+      const ch = sb.channel('rides-changes-' + Date.now())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'rides' }, () => onChange())
         .subscribe();
       return () => sb.removeChannel(ch);
+    },
+    onSignedOut(fn) {
+      sb.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') fn(); });
     },
   };
 }
